@@ -1,12 +1,12 @@
 @import 'tailwindcss';
 @plugin 'lightswind/plugin';
 
+@import "https://fonts.googleapis.com/css?family=Lato:100,300,400,700,900";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 /* @import "./lightswind.css"; */
-
-@import "https://fonts.googleapis.com/css?family=Lato:100,300,400,700,900";
 
 
 html {
