@@ -7,6 +7,7 @@ import HomePage from "./pages/HomePage";
 import ProductsPage from "./pages/ProductsPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import CartPage from "./pages/CartPage";
+import LoginPage from "./pages/LoginPage";
 
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
                     <Route path="/products" element={<Layout><ProductsPage /></Layout>} />
                     <Route path="/products/:id" element={<Layout><ProductDetailPage /></Layout>} />
                     <Route path="/cart" element={<Layout><CartPage /></Layout>} />
+                    <Route path="/login" element={<LoginPage />} />
                 </Routes>
             </BrowserRouter>
         </QueryClientProvider>

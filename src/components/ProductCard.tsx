@@ -1,48 +1,64 @@
 import { Link } from 'react-router-dom';
-import { Product } from '@/lib/data';
+import { Star, ShoppingCart } from 'lucide-react';
+import { Button } from '@/components/lightswind/button';
 import { useCartStore } from '@/store/useCartStore';
-import { ShoppingCart } from 'lucide-react';
-import { Button } from './lightswind/button';
+import { Product } from '@/lib/data';
+import { toast } from 'react-toastify';
 
 interface ProductCardProps {
-    product: Product;
+  product: Product;
 }
 
 const ProductCard = ({ product }: ProductCardProps) => {
-    const { addToCart } = useCartStore();
+  const addToCart = useCartStore((state) => state.addToCart);
 
-    const handleAddToCart = () => {
-        // For simplicity, add with the first available size and color
-        const defaultSize = product.sizes[0];
-        const defaultColor = product.colors[0];
-        addToCart(product.id, defaultSize, defaultColor);
-        // In a real app, you might open a modal to select options
-    };
+  const handleAddToCart = () => {
+    addToCart(product);
+    toast.success(`${product.name} added to cart!`);
+  };
 
-    return (
-        <div className="group relative border rounded-lg overflow-hidden bg-white dark:bg-gray-800 dark:border-gray-700 transition-shadow duration-300 hover:shadow-xl">
-            <Link to={`/products/${product.id}`}>
-                <div className="aspect-w-1 aspect-h-1 w-full overflow-hidden">
-                    <img
-                        src={product.imageUrl}
-                        alt={product.name}
-                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                    />
-                </div>
-                <div className="p-4">
-                    <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {product.name}
-                    </h3>
-                    <p className="mt-1 text-lg font-semibold text-gray-900 dark:text-white">${product.price.toFixed(2)}</p>
-                </div>
+  return (
+    <div className="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 group">
+      <Link to={`/products/${product.id}`} className="block overflow-hidden relative">
+        <img
+          src={product.image}
+          alt={product.name}
+          className="w-full h-64 object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-in-out"
+        />
+      </Link>
+      <div className="p-4 flex flex-col h-[calc(100%-16rem)]">
+        <div className="flex-grow">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{product.category}</p>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate h-7">
+            <Link to={`/products/${product.id}`} className="hover:text-sky-500 transition-colors">
+              {product.name}
             </Link>
-            <div className="p-4 pt-0">
-                <Button onClick={handleAddToCart} className="w-full">
-                    <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
-                </Button>
+          </h3>
+          
+          <div className="flex items-center mt-2">
+            <div className="flex items-center">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className={`h-4 w-4 ${i < Math.round(product.rating) ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'}`}
+                  fill="currentColor"
+                />
+              ))}
             </div>
+            <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">({product.reviews} reviews)</span>
+          </div>
         </div>
-    );
+
+        <div className="flex items-center justify-between mt-4">
+          <p className="text-xl font-bold text-gray-900 dark:text-white">${product.price.toFixed(2)}</p>
+          <Button onClick={handleAddToCart} size="sm" variant="outline">
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            Add
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default ProductCard;
