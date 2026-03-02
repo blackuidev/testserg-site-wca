@@ -1,112 +1,62 @@
-import { Link, NavLink } from 'react-router-dom';
-import { ShoppingCart, User, Menu } from 'lucide-react';
-import { useCartStore } from '@/store/useCartStore';
-import { Button } from '@/components/lightswind/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/lightswind/sheet';
-
-const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/products', label: 'Products' },
-];
+import { Link } from 'react-router-dom';
+import { ShoppingBag, User, Search } from 'lucide-react';
+import useCartStore from '@/store/useCartStore';
+import { useEffect, useState } from 'react';
 
 const Header = () => {
-  const cart = useCartStore((state) => state.cart);
-  const itemCount = cart.reduce((total, item) => total + item.quantity, 0);
+    // This pattern ensures that we don't have a hydration mismatch between server and client
+    // when using Zustand with persistence. The cart count is only rendered on the client.
+    const [cartCount, setCartCount] = useState(0);
+    const items = useCartStore(state => state.items);
 
-  return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
-        <Link to="/" className="mr-6 flex items-center space-x-2">
-          <span className="font-bold text-lg">UrbanThreads</span>
-        </Link>
-        
-        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-          {navLinks.map((link) => (
-            <NavLink
-              key={link.href}
-              to={link.href}
-              className={({ isActive }) =>
-                `transition-colors hover:text-gray-900 dark:hover:text-gray-100 ${
-                  isActive ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'
-                }`
-              }
-            >
-              {link.label}
-            </NavLink>
-          ))}
-        </nav>
+    useEffect(() => {
+        // The reduce operation is now safe because `items` is guaranteed to be an array.
+        const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+        setCartCount(totalItems);
+    }, [items]);
 
-        <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center gap-2">
-            <Link to="/login">
-              <Button variant="ghost" size="sm">
-                <User className="h-4 w-4 mr-2" />
-                Login
-              </Button>
-            </Link>
-            <Link to="/cart">
-              <Button variant="outline" size="sm" className="relative">
-                <ShoppingCart className="h-4 w-4" />
-                <span className="sr-only">Cart</span>
-                {itemCount > 0 && (
-                  <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-xs font-bold text-white">
-                    {itemCount}
-                  </span>
-                )}
-              </Button>
-            </Link>
-          </div>
+    const navLinks = [
+        { href: '/', label: 'Home' },
+        { href: '/products', label: 'Products' },
+    ];
 
-          <div className="md:hidden">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Open menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right">
-                <div className="flex flex-col space-y-4 p-4">
-                  <Link to="/" className="font-bold text-lg mb-4">UrbanThreads</Link>
-                  {navLinks.map((link) => (
-                    <NavLink
-                      key={`mobile-${link.href}`}
-                      to={link.href}
-                      className={({ isActive }) =>
-                        `transition-colors hover:text-gray-900 dark:hover:text-gray-100 ${
-                          isActive ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 dark:text-gray-400'
-                        }`
-                      }
-                    >
-                      {link.label}
-                    </NavLink>
-                  ))}
-                  <hr className="border-gray-200 dark:border-gray-700"/>
-                  <Link to="/login">
-                    <Button variant="outline" className="w-full justify-start">
-                      <User className="h-4 w-4 mr-2" />
-                      Login
-                    </Button>
-                  </Link>
-                  <Link to="/cart">
-                    <Button variant="outline" className="w-full justify-start relative">
-                      <ShoppingCart className="h-4 w-4 mr-2" />
-                      Cart
-                      {itemCount > 0 && (
-                        <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-sky-500 text-xs font-bold text-white">
-                          {itemCount}
-                        </span>
-                      )}
-                    </Button>
-                  </Link>
+    return (
+        <header className="sticky top-0 z-50 w-full border-b backdrop-blur-lg bg-white/30 dark:bg-black/30">
+            <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+                <Link to="/" className="mr-6 flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" className="h-6 w-6 text-black dark:text-white"><rect width="256" height="256" fill="none"></rect><line x1="208" y1="128" x2="128" y2="208" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="16"></line><line x1="192" y1="40" x2="40" y2="192" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="16"></line></svg>
+                    <span className="hidden font-bold sm:inline-block text-gray-900 dark:text-gray-100">Lightswind</span>
+                </Link>
+                <nav className="hidden md:flex gap-6">
+                    {navLinks.map((link) => (
+                        <Link
+                            key={link.href}
+                            to={link.href}
+                            className="text-sm font-medium text-gray-600 dark:text-gray-400 transition-colors hover:text-gray-900 dark:hover:text-gray-100"
+                        >
+                            {link.label}
+                        </Link>
+                    ))}
+                </nav>
+                <div className="flex items-center gap-2 sm:gap-4">
+                    <button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800">
+                        <Search className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                    </button>
+                    <Link to="/login" className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800">
+                        <User className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                    </Link>
+                    <Link to="/cart" className="relative p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800">
+                        <ShoppingBag className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                        {cartCount > 0 && (
+                            <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                                {cartCount}
+                            </span>
+                        )}
+                    </Link>
                 </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-        </div>
-      </div>
-    </header>
-  );
+            </div>
+        </header>
+    );
 };
 
 export default Header;

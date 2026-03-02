@@ -1,63 +1,54 @@
 import { create } from 'zustand';
-import { products, Product } from '@/lib/data';
+import { persist } from 'zustand/middleware';
 
-export interface CartItem extends Product {
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
   quantity: number;
+  image: string;
 }
 
 interface CartState {
   items: CartItem[];
-  addToCart: (productId: number, size: string, color: string) => void;
-  removeFromCart: (productId: number, size: string, color: string) => void;
-  updateQuantity: (productId: number, size: string, color: string, quantity: number) => void;
+  addItem: (item: CartItem) => void;
+  removeItem: (itemId: string) => void;
+  updateQuantity: (itemId: string, quantity: number) => void;
   clearCart: () => void;
 }
 
-export const useCartStore = create<CartState>((set) => ({
-  items: [],
-  addToCart: (productId, size, color) =>
-    set((state) => {
-      const product = products.find((p) => p.id === productId);
-      if (!product) return state;
-
-      const existingItem = state.items.find(
-        (item) => item.id === productId && item.selectedSize === size && item.selectedColor === color
-      );
-
-      if (existingItem) {
-        const updatedItems = state.items.map((item) =>
-          item.id === productId && item.selectedSize === size && item.selectedColor === color
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-        return { items: updatedItems };
-      } else {
-        const newItem: CartItem = { ...product, quantity: 1, selectedSize: size, selectedColor: color };
-        return { items: [...state.items, newItem] };
-      }
-    }),
-  removeFromCart: (productId, size, color) =>
-    set((state) => ({
-      items: state.items.filter(
-        (item) => !(item.id === productId && item.selectedSize === size && item.selectedColor === color)
-      ),
-    })),
-  updateQuantity: (productId, size, color, quantity) =>
-    set((state) => {
-        if (quantity <= 0) {
+const useCartStore = create<CartState>()(
+  persist(
+    (set) => ({
+      items: [], // Initialize with an empty array to prevent runtime errors
+      addItem: (item) =>
+        set((state) => {
+          const existingItem = state.items.find((i) => i.id === item.id);
+          if (existingItem) {
             return {
-                items: state.items.filter(
-                    (item) => !(item.id === productId && item.selectedSize === size && item.selectedColor === color)
-                ),
-            }
-        }
-        return {
-            items: state.items.map((item) =>
-                item.id === productId && item.selectedSize === size && item.selectedColor === color
-                ? { ...item, quantity }
-                : item
-            ),
-        }
+              items: state.items.map((i) =>
+                i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i
+              ),
+            };
+          }
+          return { items: [...state.items, item] };
+        }),
+      removeItem: (itemId) =>
+        set((state) => ({
+          items: state.items.filter((item) => item.id !== itemId),
+        })),
+      updateQuantity: (itemId, quantity) =>
+        set((state) => ({
+          items: state.items.map((item) =>
+            item.id === itemId ? { ...item, quantity } : item
+          ).filter(item => item.quantity > 0),
+        })),
+      clearCart: () => set({ items: [] }),
     }),
-  clearCart: () => set({ items: [] }),
-}));
+    {
+      name: 'cart-storage', // unique name for localStorage
+    }
+  )
+);
+
+export default useCartStore;
